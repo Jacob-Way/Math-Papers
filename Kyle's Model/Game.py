@@ -49,84 +49,60 @@ import sys
 ##    return b*(v_-p0)
 ##N = 100
 
-p_0=100
+p0=100
+S0=10
 v_=110
-su=10
-N=100
+su=30
+N=50
 #processes
 p_ = np.zeros(N)
+p_[0]=90
 x_ = np.zeros(N)
 u_ = np.zeros(N)
 X = np.zeros(N)
 P = np.zeros(N)
-
-l = np.random.random(N)*10
-b = np.random.random(N)*10
-a = np.random.random(N)*10
-d = np.random.random(N)*10
-S = np.random.random(N)*10
+#equilibrium variables
+l=np.ones(N)*(S0/su**2)**0.5
+b=np.zeros(N)
+a=np.zeros(N)
+d=np.zeros(N)
+S=np.zeros(N)
 #assign values to b,l,a,d,S
-for iteration in range(10000):
-    for n in range(N):
-        if(n>0):
-            a[n-1]=min(1000,1/(4*l[n]*(1-a[n]*l[n])))
-            d[n-1]=max(0.01,min(1000,d[n]+a[n]*l[n]**2*su**2/N))
-            S[n]=max(1,min(1000,(1-b[n]*l[n]/N)*S[n-1]))
-        b[n]=min(1000,(1-2*a[n]*l[n])/(2*l[n]*(1-a[n]*l[n]))/N)
-        l[n]=min(1000,b[n]*S[n]/su**2)
-        if(n==N-1):
-            a[n]=0
-            d[n]=0
-        #if(iteration%10000==0):
-            #print(l[n]*(1-a[n]*l[n]))
-aerror = 0
-derror = 0
-Serror = 0
-berror = 0
-lerror = 0
-for n in range(N):
-    if(n>0):
-        aerror = abs(a[n-1]-1/(4*l[n]*(1-a[n]*l[n])))
-        derror = abs(d[n-1]-d[n]+a[n]*l[n]**2*su**2/N)
-        Serror = abs(S[n]-(1-b[n]*l[n]/N)*S[n-1])
-    berror = abs(b[n]-(1-2*a[n]*l[n])/(2*l[n]*(1-a[n]*l[n]))/N)
-    lerror = abs(l[n]-b[n]*S[n]/su**2)
-##for i in range(N):
-##    #assign noise actions
-##    du_ = np.random.normal(0,su*(N)**(-0.5),1)
-##    if(i==0):u_[0]=du_
-##    else:u_[i]=u[i-1]+du_
-##    #assign insider actions
-##    if(i==0):
-##        dx_ = b[i]*(v_-p_0)
-##        x_[i]=dx_
-##    else:
-##        dx_ = b[i]*(v_-p_[i-1])
-##        x_[i]=dx_+x[i-1]
-##    #assign pricing actions
-##    dp_ = l[i]*(dx_+du_)
-##    if(i==0):
-##        p_[i] = dp_
-##    else:
-##        p_[i] = dp_+p_[i-1]
-print(lerror)
-print(berror)
-print(aerror)
-print(derror)
-print(Serror)
-    
-plt.plot(l)
+for i in range(N):
+    t=i/N
+    S[i]=(1-t)*S0
+    b[i]=su**2*l[i]/S[i]
+    a[i]=0.5*(su**2*S0)**0.5
+    d[i]=a[i]*(1-t)
+#Carry out simulation
+for i in range(N):
+    #assign noise actions
+    du_ = np.random.normal(0,su*(N)**(-0.5),1)
+    if(i==0):u_[0]=du_
+    else:u_[i]=u_[i-1]+du_
+    #assign insider actions
+    if(i==0):
+        dx_ = b[i]*(v_-p0)/N
+        x_[i]=dx_
+    else:
+        dx_ = b[i]*(v_-p_[i-1])/N
+        x_[i]=dx_+x_[i-1]
+    #assign pricing actions
+    dp_ = l[i]*(dx_+du_)
+    if(i==0):
+        p_[i] = dp_+p_[0]
+    else:
+        p_[i] = dp_+p_[i-1]
+plt.subplot(2,2,1)
+plt.plot(x_,label="insider")
+plt.legend()
+plt.subplot(2,2,2)
+plt.plot(u_,label="noise")
+plt.legend()
+plt.subplot(2,2,3)
+plt.plot(p_,label="price")
+plt.legend()
 plt.show()
-plt.plot(b)
-plt.show()
-plt.plot(a)
-plt.show()
-plt.plot(d)
-plt.show()
-plt.plot(S)
-plt.show()
-
-
 
 
 
