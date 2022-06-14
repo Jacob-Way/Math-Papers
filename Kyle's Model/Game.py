@@ -49,14 +49,14 @@ import sys
 ##    return b*(v_-p0)
 ##N = 100
 
-p0=100
-S0=10
-v_=110
-su=30
-N=50
+p0=3749
+S0=400
+v_=3750
+su=2950000
+N=500
 #processes
 p_ = np.zeros(N)
-p_[0]=90
+p_[0]=p0
 x_ = np.zeros(N)
 u_ = np.zeros(N)
 X = np.zeros(N)
@@ -93,14 +93,27 @@ for i in range(N):
         p_[i] = dp_+p_[0]
     else:
         p_[i] = dp_+p_[i-1]
+dx_ = np.zeros(N)
+pi_ = np.zeros(N)
+pr = np.zeros(N)
+for i in range(N):
+    if(i==0):
+        pi_[0]=0
+        dx_[0]=x_[0]
+    else:
+        pi_[i]=x_[i-1]*(p_[i]-p_[i-1])+pi_[i-1]
+        dx_[i]=x_[i]-x_[i-1]
 plt.subplot(2,2,1)
-plt.plot(x_,label="insider")
+plt.plot(x_,label="insider position (# of stocks)")
 plt.legend()
 plt.subplot(2,2,2)
-plt.plot(u_,label="noise")
+plt.plot(u_,label="noise position (# of stocks)")
 plt.legend()
 plt.subplot(2,2,3)
-plt.plot(p_,label="price")
+plt.plot(p_,label="price ($)")
+plt.legend()
+plt.subplot(2,2,4)
+plt.plot(pi_,label="insider profit ($)")
 plt.legend()
 plt.show()
 
