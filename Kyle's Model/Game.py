@@ -51,13 +51,14 @@ import sys
 
 p0=3749
 S0=400
-v_=3750
+v_=3749
 su=2950000
 N=500
 #processes
 p_ = np.zeros(N)
 p_[0]=p0
 x_ = np.zeros(N)
+du_ = np.zeros(N)
 u_ = np.zeros(N)
 X = np.zeros(N)
 P = np.zeros(N)
@@ -77,9 +78,10 @@ for i in range(N):
 #Carry out simulation
 for i in range(N):
     #assign noise actions
-    du_ = np.random.normal(0,su*(N)**(-0.5),1)
-    if(i==0):u_[0]=du_
-    else:u_[i]=u_[i-1]+du_
+    du_[i] = np.random.normal(0,su*(N)**(-0.5),1)
+    #du_ = 0
+    if(i==0):u_[0]=du_[i]
+    else:u_[i]=u_[i-1]+du_[i]
     #assign insider actions
     if(i==0):
         dx_ = b[i]*(v_-p0)/N
@@ -88,7 +90,7 @@ for i in range(N):
         dx_ = b[i]*(v_-p_[i-1])/N
         x_[i]=dx_+x_[i-1]
     #assign pricing actions
-    dp_ = l[i]*(dx_+du_)
+    dp_ = l[i]*(dx_+du_[i])
     if(i==0):
         p_[i] = dp_+p_[0]
     else:
@@ -103,17 +105,20 @@ for i in range(N):
     else:
         pi_[i]=x_[i-1]*(p_[i]-p_[i-1])+pi_[i-1]
         dx_[i]=x_[i]-x_[i-1]
-plt.subplot(2,2,1)
+plt.subplot(2,3,1)
 plt.plot(x_,label="insider position (# of stocks)")
 plt.legend()
-plt.subplot(2,2,2)
+plt.subplot(2,3,2)
 plt.plot(u_,label="noise position (# of stocks)")
 plt.legend()
-plt.subplot(2,2,3)
+plt.subplot(2,3,3)
 plt.plot(p_,label="price ($)")
 plt.legend()
-plt.subplot(2,2,4)
+plt.subplot(2,3,4)
 plt.plot(pi_,label="insider profit ($)")
+plt.legend()
+plt.subplot(2,3,5)
+plt.plot(dx_+du_,label="volume ($)")
 plt.legend()
 plt.show()
 
